@@ -1,5 +1,5 @@
 zigbee2mqtt:
-  image: koenkk/zigbee2mqtt
+  image: koenkk/zigbee2mqtt:1.42.0
   replicas: 1
   config:
     TZ: "Europe/Berlin"
