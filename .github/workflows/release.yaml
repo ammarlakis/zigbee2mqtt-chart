@@ -83,7 +83,7 @@ jobs:
         uses: the-actions-org/workflow-dispatch@v4
         with:
           repo: "ammarlakis/helm-charts"
-          workflow: "publish_chart"
+          workflow: Add Chart to Helm Repository
           ref: "master"
           wait-for-completion: false
           inputs: |
