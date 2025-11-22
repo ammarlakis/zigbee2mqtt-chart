@@ -3,8 +3,8 @@ name: Release Charts
 on:
   push:
     tags:
-      - 'v*'
-  
+      - "v*"
+
 jobs:
   release:
     permissions:
@@ -25,6 +25,31 @@ jobs:
         uses: azure/setup-helm@v3
 
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.6.0
+        id: run_chart_releaser
+        uses: helm/chart-releaser-action@v1.7.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+    outputs:
+      release_name: ${{ steps.run_chart_releaser.outputs.release_name }}
+
+  update-registry:
+    steps:
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: 2336325
+          private-key: ${{ secrets.UPDATE_REGISTRY_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Trigger update-registry workflow
+        uses: benc-uk/workflow-dispatch-action@v1
+        with:
+          repo: "ammarlakis/helm-charts"
+          workflow: "update-registry"
+          ref: "master"
+          inputs:
+            repository: "ammarlakis/zigbee2mqtt"
+            release_name: "${{ steps.release.outputs.release_name }}"
+          token: ${{ steps.app-token.outputs.token }}
