@@ -89,7 +89,7 @@ jobs:
           wait-for-completion: false
           inputs: |
             {
-              "repository": "ammarlakis/zigbee2mqtt",
+              "repository": "${{ github.repository }}",
               "release_name": "${{ needs.release.outputs.release_name }}"
             }
           token: ${{ steps.app-token.outputs.token }}
