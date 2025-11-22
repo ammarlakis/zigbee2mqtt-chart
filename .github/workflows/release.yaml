@@ -11,31 +11,61 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
+    outputs:
+      release_name: ${{ steps.version.outputs.tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
       - name: Install Helm
         uses: azure/setup-helm@v3
 
-      - name: Run chart-releaser
-        id: run_chart_releaser
-        uses: helm/chart-releaser-action@v1.7.0
-        with:
-          skip_upload: true
-          packages_with_index: false
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Determine version and changelog
+        id: version
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#v}"
 
-    outputs:
-      release_name: ${{ steps.run_chart_releaser.outputs.chart_version }}
+          if [ "$tag" = "$version" ]; then
+            version=$(grep '^version:' charts/zigbee2mqtt/Chart.yaml | awk '{print $2}')
+          fi
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          if git describe --tags --abbrev=0 HEAD^ >/dev/null 2>&1; then
+            prev_tag=$(git describe --tags --abbrev=0 HEAD^)
+            range="$prev_tag..$tag"
+          else
+            first_commit=$(git rev-list --max-parents=0 HEAD)
+            range="$first_commit..$tag"
+          fi
+
+          printf 'changelog<<EOF\n' >> "$GITHUB_OUTPUT"
+          git log --oneline "$range" >> "$GITHUB_OUTPUT"
+          printf 'EOF\n' >> "$GITHUB_OUTPUT"
+
+      - name: Package Helm chart
+        id: package
+        run: |
+          mkdir -p dist
+          helm package charts/zigbee2mqtt --destination dist
+          file=$(ls dist/zigbee2mqtt-*.tgz)
+          echo "file=$file" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release and upload asset
+        uses: softprops/action-gh-release@v2.4.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          body: ${{ steps.version.outputs.changelog }}
+          draft: false
+          prerelease: false
+          files: ${{ steps.package.outputs.file }}
 
   update-registry:
     needs: release
