@@ -1,14 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: "{{ .Release.Name }}"
+  name: {{ include "zigbee2mqtt.fullname" . }}
   labels:
-    app: "{{ .Release.Name }}-zigbee2mqtt"
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    {{- include "zigbee2mqtt.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.zigbee2mqtt.service.type }}
   selector:
-    app: "{{ .Release.Name }}-zigbee2mqtt"
+    {{- include "zigbee2mqtt.selectorLabels" . | nindent 4 }}
   ports:
     - name: http
       port: {{ .Values.zigbee2mqtt.service.port }}

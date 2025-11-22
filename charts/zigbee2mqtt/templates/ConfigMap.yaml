@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-zigbee2mqtt-config
+  name: {{ printf "%s-config" (include "zigbee2mqtt.fullname" .) }}
 data:
   configuration.yaml: |
     {{- toYaml .Values.zigbee2mqtt.initConfig | nindent 4 -}}

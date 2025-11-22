@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ .Release.Name }}-zigbee2mqtt
+  name: {{ include "zigbee2mqtt.fullname" . }}
   labels:
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    {{- include "zigbee2mqtt.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      app: "{{ .Release.Name }}-zigbee2mqtt"
-  serviceName: "{{ .Release.Name }}"
+      {{- include "zigbee2mqtt.selectorLabels" . | nindent 6 }}
+  serviceName: {{ include "zigbee2mqtt.fullname" . }}
   replicas: 1
   template:
     metadata:
       labels:
-        app: "{{ .Release.Name }}-zigbee2mqtt"
+        {{- include "zigbee2mqtt.selectorLabels" . | nindent 8 }}
     spec:
       initContainers:
         - name: init
@@ -57,7 +57,7 @@ spec:
             path: "{{ .Values.zigbee2mqtt.config.zigbee_device }}"
         - name: config
           configMap:
-            name: "{{ .Release.Name }}-zigbee2mqtt-config"
+            name: {{ printf "%s-config" (include "zigbee2mqtt.fullname" .) }}
   volumeClaimTemplates:
     - metadata:
         name: data
