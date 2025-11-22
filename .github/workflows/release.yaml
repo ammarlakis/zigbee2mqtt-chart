@@ -79,12 +79,13 @@ jobs:
           private-key: ${{ secrets.UPDATE_REGISTRY_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
 
-      - name: Trigger update-registry workflow
-        uses: benc-uk/workflow-dispatch@v1.2.4
+      - name: Trigger registry update
+        uses: the-actions-org/workflow-dispatch@v4
         with:
           repo: "ammarlakis/helm-charts"
-          workflow: "update-registry"
+          workflow: "publish_chart"
           ref: "master"
+          wait-for-completion: false
           inputs: |
             {
               "repository": "ammarlakis/zigbee2mqtt",
