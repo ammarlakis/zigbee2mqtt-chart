@@ -1,0 +1,3 @@
+# Ignore Helm templates (Go templating inside YAML)
+charts/**/templates/*.yaml
+charts/**/templates/*.yml

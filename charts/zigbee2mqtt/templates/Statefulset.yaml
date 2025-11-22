@@ -20,8 +20,8 @@ spec:
           image: busybox
           command: ["sh"]
           args:
-          - -c
-          - "[ -f /app/data/configuration.yaml ] || cp /configuration.yaml /app/data/"
+            - -c
+            - "[ -f /app/data/configuration.yaml ] || cp /configuration.yaml /app/data/"
           volumeMounts:
             - name: data
               mountPath: /app/data
@@ -45,8 +45,8 @@ spec:
             - name: zigbee-device
               mountPath: /dev/ttyUSB0
           env:
-          - name: TZ
-            value: "{{ .Values.zigbee2mqtt.config.TZ }}"
+            - name: TZ
+              value: "{{ .Values.zigbee2mqtt.config.TZ }}"
       volumes:
         - name: udev
           hostPath:

@@ -7,4 +7,7 @@
 #   just bump major
 
 bump type='patch':
+    helm-docs
+    prettier charts/zigbee2mqtt/README.md -w
+    git add charts/zigbee2mqtt/README.md
     ./scripts/bump-version.sh {{type}}
