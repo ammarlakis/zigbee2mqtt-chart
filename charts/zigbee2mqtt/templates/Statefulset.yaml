@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: "{{ .Release.Name }}"-zigbee2mqtt
+  name: {{ .Release.Name }}-zigbee2mqtt
   labels:
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
 spec:
   selector:
     matchLabels:
       app: "{{ .Release.Name }}-zigbee2mqtt"
   serviceName: "{{ .Release.Name }}"
-  replicas: {{ .Values.zigbee2mqtt.replicas | int }}
+  replicas: 1
   template:
     metadata:
       labels:
@@ -35,7 +35,7 @@ spec:
           image: "{{ .Values.zigbee2mqtt.image }}"
           ports:
             - containerPort: 8080
-              name: mqtt
+              name: http
           volumeMounts:
             - name: data
               mountPath: /app/data
@@ -43,7 +43,7 @@ spec:
               mountPath: /run/udev
               readOnly: true
             - name: zigbee-device
-              mountPath: /dev/ttyACM0
+              mountPath: /dev/ttyUSB0
           env:
           - name: TZ
             value: "{{ .Values.zigbee2mqtt.config.TZ }}"
@@ -55,7 +55,6 @@ spec:
         - name: zigbee-device
           hostPath:
             path: "{{ .Values.zigbee2mqtt.config.zigbee_device }}"
-            type: ""
         - name: config
           configMap:
             name: "{{ .Release.Name }}-zigbee2mqtt-config"

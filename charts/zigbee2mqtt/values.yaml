@@ -1,6 +1,8 @@
 zigbee2mqtt:
-  image: koenkk/zigbee2mqtt:1.42.0
-  replicas: 1
+  image: koenkk/zigbee2mqtt:2.6.3
+  service:
+    type: ClusterIP
+    port: 8080
   config:
     TZ: "Europe/Berlin"
     zigbee_device: /dev/ttyUSB0

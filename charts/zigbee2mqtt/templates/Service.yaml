@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Release.Name }}"
+  labels:
+    app: "{{ .Release.Name }}-zigbee2mqtt"
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+spec:
+  type: {{ .Values.zigbee2mqtt.service.type }}
+  selector:
+    app: "{{ .Release.Name }}-zigbee2mqtt"
+  ports:
+    - name: http
+      port: {{ .Values.zigbee2mqtt.service.port }}
+      targetPort: http
