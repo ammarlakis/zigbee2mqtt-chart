@@ -1,6 +1,6 @@
 apiVersion: v2
 name: zigbee2mqtt
-version: 0.1.0
+version: 0.1.1
 description: Zigbee2MQTT Helm chart
 type: application
 appVersion: "1.42.0"
