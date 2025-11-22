@@ -80,7 +80,7 @@ jobs:
           owner: ${{ github.repository_owner }}
 
       - name: Trigger update-registry workflow
-        uses: benc-uk/workflow-dispatch-action@v1
+        uses: benc-uk/workflow-dispatch@v1.2.4
         with:
           repo: "ammarlakis/helm-charts"
           workflow: "update-registry"
