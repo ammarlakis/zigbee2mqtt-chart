@@ -31,9 +31,10 @@ jobs:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
     outputs:
-      release_name: ${{ steps.run_chart_releaser.outputs.release_name }}
+      release_name: ${{ steps.run_chart_releaser.outputs.chart_version }}
 
   update-registry:
+    needs: release
     runs-on: ubuntu-latest
     steps:
       - name: Create GitHub App token
@@ -50,7 +51,9 @@ jobs:
           repo: "ammarlakis/helm-charts"
           workflow: "update-registry"
           ref: "master"
-          inputs:
-            repository: "ammarlakis/zigbee2mqtt"
-            release_name: "${{ steps.release.outputs.release_name }}"
+          inputs: |
+            {
+              "repository": "ammarlakis/zigbee2mqtt",
+              "release_name": "${{ needs.release.outputs.release_name }}"
+            }
           token: ${{ steps.app-token.outputs.token }}
