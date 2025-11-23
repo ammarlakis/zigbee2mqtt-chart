@@ -14,6 +14,7 @@ zigbee2mqtt:
             pathType: Prefix
     tls: []
   timezone: "Europe/Berlin"
+  zigbee_device: /dev/ttyUSB0
 
   overwriteConfig: false
   initConfig:
