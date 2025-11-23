@@ -54,7 +54,7 @@ spec:
             type: Directory
         - name: zigbee-device
           hostPath:
-            path: "{{ .Values.zigbee2mqtt.config.zigbee_device }}"
+            path: "{{ .Values.zigbee2mqtt.initConfig.serial.port }}"
         - name: config
           configMap:
             name: {{ printf "%s-config" (include "zigbee2mqtt.fullname" .) }}

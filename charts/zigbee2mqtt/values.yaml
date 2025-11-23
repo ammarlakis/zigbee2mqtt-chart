@@ -15,7 +15,6 @@ zigbee2mqtt:
     tls: []
   config:
     TZ: "Europe/Berlin"
-    zigbee_device: /dev/ttyUSB0
 
   overwriteConfig: false
   initConfig:
