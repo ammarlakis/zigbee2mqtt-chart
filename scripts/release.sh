@@ -34,10 +34,16 @@ echo "Updating ${CHART_FILE}..."
 sed -i.bak "s/^version: .*/version: ${new_version}/" "${CHART_FILE}"
 rm -f "${CHART_FILE}.bak"
 
+echo "Regenerating Helm docs..."
+helm-docs
+
+echo "Formatting README..."
+prettier charts/zigbee2mqtt/README.md -w
+
 echo "Updating CHANGELOG.md with git-cliff..."
 git cliff --unreleased --tag "${tag}" --prepend CHANGELOG.md
 
-git add "${CHART_FILE}" CHANGELOG.md
+git add "${CHART_FILE}" CHANGELOG.md charts/zigbee2mqtt/README.md
 
  git commit -m "chore(release): prepare for ${new_version}" || {
   echo "Nothing to commit; aborting" >&2
