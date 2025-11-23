@@ -32,7 +32,7 @@ spec:
         - name: app
           securityContext:
             privileged: true
-          image: "{{ .Values.zigbee2mqtt.image }}"
+          image: "{{ .Values.zigbee2mqtt.image.repository }}:{{ default .Chart.AppVersion .Values.zigbee2mqtt.image.tag }}"
           ports:
             - containerPort: 8080
               name: http

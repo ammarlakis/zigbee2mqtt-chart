@@ -1,5 +1,7 @@
 zigbee2mqtt:
-  image: koenkk/zigbee2mqtt:2.6.3
+  image:
+    repository: koenkk/zigbee2mqtt
+    tag: "" # defaults to .Chart.AppVersion when empty
   service:
     type: ClusterIP
     port: 8080

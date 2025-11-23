@@ -3,4 +3,4 @@ name: zigbee2mqtt
 version: 0.3.1
 description: Zigbee2MQTT Helm chart
 type: application
-appVersion: "1.42.0"
+appVersion: 2.6.3
