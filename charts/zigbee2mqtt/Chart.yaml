@@ -4,3 +4,14 @@ version: 0.3.1
 description: Zigbee2MQTT Helm chart
 type: application
 appVersion: 2.6.3
+home: https://github.com/ammarlakis/zigbee2mqtt-chart
+maintainers:
+  - name: Ammar Lakis
+    url: https://github.com/ammarlakis
+sources:
+  - https://github.com/Koenkk/zigbee2mqtt
+keywords:
+  - zigbee
+  - mqtt
+  - homeassistant
+  - zigbee2mqtt
