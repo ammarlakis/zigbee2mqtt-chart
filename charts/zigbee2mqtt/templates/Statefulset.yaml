@@ -21,7 +21,7 @@ spec:
           command: ["sh"]
           args:
             - -c
-            - "[ -f /app/data/configuration.yaml ] || cp /configuration.yaml /app/data/"
+            - "{{- if .Values.zigbee2mqtt.overwriteConfig -}}cp /configuration.yaml /app/data/{{- else -}}[ -f /app/data/configuration.yaml ] || cp /configuration.yaml /app/data/{{- end -}}"
           volumeMounts:
             - name: data
               mountPath: /app/data

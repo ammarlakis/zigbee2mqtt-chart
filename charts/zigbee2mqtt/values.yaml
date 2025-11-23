@@ -17,6 +17,7 @@ zigbee2mqtt:
     TZ: "Europe/Berlin"
     zigbee_device: /dev/ttyUSB0
 
+  overwriteConfig: false
   initConfig:
     homeassistant: true
     permit_join: true
