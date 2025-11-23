@@ -8,16 +8,7 @@ repos:
         pass_filenames: false
         files: ^charts/zigbee2mqtt/(Chart.yaml|values.yaml|README.md\.gotmpl)$
 
-      - id: format
-        name: format
-        entry: just fmt
-        language: system
-        types_or:
-          - markdown
-          - yaml
-          - json
-          - javascript
-          - typescript
-          - css
-          - scss
-          - html
+  - repo: https://github.com/rbubley/mirrors-prettier
+    rev: "v3.6.2"
+    hooks:
+      - id: prettier
