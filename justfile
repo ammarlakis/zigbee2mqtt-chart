@@ -1,13 +1,9 @@
-# Version bump helper for the Zigbee2MQTT chart
-
+# Commit-driven release helper
 # Usage:
-#   just bump            # defaults to patch
-#   just bump patch
-#   just bump minor
-#   just bump major
+#   just release
 
-bump type='patch':
+release:
     helm-docs
     prettier charts/zigbee2mqtt/README.md -w
     git add charts/zigbee2mqtt/README.md
-    ./scripts/bump-version.sh {{type}}
+    ./scripts/release.sh
