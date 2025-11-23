@@ -1,0 +1,23 @@
+repos:
+  - repo: local
+    hooks:
+      - id: generate-docs
+        name: generate-docs
+        entry: just docs
+        language: system
+        pass_filenames: false
+        files: ^charts/zigbee2mqtt/(Chart.yaml|values.yaml|README.md\.gotmpl)$
+
+      - id: format
+        name: format
+        entry: just fmt
+        language: system
+        types_or:
+          - markdown
+          - yaml
+          - json
+          - javascript
+          - typescript
+          - css
+          - scss
+          - html
