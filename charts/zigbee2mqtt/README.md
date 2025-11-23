@@ -1,6 +1,6 @@
 # zigbee2mqtt
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.42.0](https://img.shields.io/badge/AppVersion-1.42.0-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.42.0](https://img.shields.io/badge/AppVersion-1.42.0-informational?style=flat-square)
 
 Zigbee2MQTT Helm chart
 
@@ -32,6 +32,7 @@ Zigbee2MQTT Helm chart
 | zigbee2mqtt.service.port                               | int    | `8080`                       |             |
 | zigbee2mqtt.service.type                               | string | `"ClusterIP"`                |             |
 | zigbee2mqtt.timezone                                   | string | `"Europe/Berlin"`            |             |
+| zigbee2mqtt.zigbee_device                              | string | `"/dev/ttyUSB0"`             |             |
 
 ---
 
