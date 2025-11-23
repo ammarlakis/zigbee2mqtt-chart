@@ -1,40 +1,68 @@
 zigbee2mqtt:
+  # -- Zigbee2MQTT image configuration.
   image:
+    # -- Container image repository for Zigbee2MQTT.
     repository: koenkk/zigbee2mqtt
-    tag: "" # defaults to .Chart.AppVersion when empty
+    # -- Container image tag. Defaults to .Chart.AppVersion when empty.
+    tag: ""
+
+  # -- Service configuration for the Zigbee2MQTT HTTP API / frontend.
   service:
+    # -- Service type.
     type: ClusterIP
+    # -- Service port for the HTTP API / frontend.
     port: 8080
+
+  # -- Ingress configuration for exposing the HTTP API / frontend.
   ingress:
+    # -- Enable Ingress resource for Zigbee2MQTT.
     enabled: false
+    # -- Ingress class name. If empty, the cluster default is used.
     className: ""
+    # -- Additional Ingress annotations.
     annotations: {}
+    # -- List of Ingress host definitions.
     hosts:
-      - host: zigbee2mqtt.local
-        paths:
-          - path: /
-            pathType: Prefix
+      #   host: zigbee2mqtt.local
+      #   paths:
+      #     - path: /
+      #       pathType: Prefix
+    # -- Ingress TLS configuration.
     tls: []
+
+  # -- Timezone for the container (TZ environment variable).
   timezone: "Europe/Berlin"
+
+  # -- Path to the Zigbee adapter device on the node.
   zigbee_device: /dev/ttyUSB0
 
+  # -- If true, always overwrite configuration.yaml in the data volume
+  #    from the ConfigMap on startup. When false, the file is only
+  #    created if it does not already exist.
   overwriteConfig: false
-  initConfig:
-    homeassistant:
-      enabled: true
-      discovery_topic: homeassistant
-      status_topic: homeassistant/status
-    permit_join: true
-    frontend:
-      enabled: true
-    mqtt:
-      base_topic: zigbee2mqtt
-      server: "mqtt://mosquitto"
-      include_device_information: true
-    serial:
-      port: /dev/ttyUSB0
-    advanced:
-      log_output:
-        - console
-      log_level: info
-      last_seen: "ISO_8601"
+
+  # -- Initial Zigbee2MQTT configuration written to configuration.yaml.
+  initConfig: {}
+    # homeassistant:
+    #   enabled: true
+    #   discovery_topic: homeassistant
+    #   status_topic: homeassistant/status
+
+    # permit_join: true
+
+    # frontend:
+    #   enabled: true
+
+    # mqtt:
+    #   base_topic: zigbee2mqtt
+    #   server: "mqtt://mosquitto"
+    #   include_device_information: true
+
+    # serial:
+    #   port: /dev/ttyUSB0
+
+    # advanced:
+    #   log_output:
+    #     - console
+    #   log_level: info
+    #   last_seen: "ISO_8601"
