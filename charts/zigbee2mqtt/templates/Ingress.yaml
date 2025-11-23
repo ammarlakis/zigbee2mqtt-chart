@@ -1,0 +1,35 @@
+{{- if .Values.zigbee2mqtt.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "zigbee2mqtt.fullname" . }}
+  labels:
+    {{- include "zigbee2mqtt.labels" . | nindent 4 }}
+  {{- with .Values.zigbee2mqtt.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.zigbee2mqtt.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+    {{- range .Values.zigbee2mqtt.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ include "zigbee2mqtt.fullname" $ }}
+                port:
+                  number: {{ $.Values.zigbee2mqtt.service.port }}
+          {{- end }}
+    {{- end }}
+  {{- with .Values.zigbee2mqtt.ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
