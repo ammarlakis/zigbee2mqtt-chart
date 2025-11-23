@@ -13,8 +13,7 @@ zigbee2mqtt:
           - path: /
             pathType: Prefix
     tls: []
-  config:
-    TZ: "Europe/Berlin"
+  timezone: "Europe/Berlin"
 
   overwriteConfig: false
   initConfig:

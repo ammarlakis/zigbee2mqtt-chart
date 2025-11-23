@@ -46,7 +46,7 @@ spec:
               mountPath: /dev/ttyUSB0
           env:
             - name: TZ
-              value: "{{ .Values.zigbee2mqtt.config.TZ }}"
+              value: "{{ .Values.zigbee2mqtt.timezone }}"
       volumes:
         - name: udev
           hostPath:
