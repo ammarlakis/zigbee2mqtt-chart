@@ -1,31 +1,37 @@
 # zigbee2mqtt
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.42.0](https://img.shields.io/badge/AppVersion-1.42.0-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.42.0](https://img.shields.io/badge/AppVersion-1.42.0-informational?style=flat-square)
 
 Zigbee2MQTT Helm chart
 
 ## Values
 
-| Key                                                           | Type   | Default                      | Description |
-| ------------------------------------------------------------- | ------ | ---------------------------- | ----------- |
-| zigbee2mqtt.config.TZ                                         | string | `"Europe/Berlin"`            |             |
-| zigbee2mqtt.config.zigbee_device                              | string | `"/dev/ttyUSB0"`             |             |
-| zigbee2mqtt.image                                             | string | `"koenkk/zigbee2mqtt:2.6.3"` |             |
-| zigbee2mqtt.initConfig.advanced.homeassistant_discovery_topic | string | `"homeassistant"`            |             |
-| zigbee2mqtt.initConfig.advanced.homeassistant_status_topic    | string | `"homeassistant/status"`     |             |
-| zigbee2mqtt.initConfig.advanced.last_seen                     | string | `"ISO_8601"`                 |             |
-| zigbee2mqtt.initConfig.advanced.log_level                     | string | `"info"`                     |             |
-| zigbee2mqtt.initConfig.advanced.log_output[0]                 | string | `"console"`                  |             |
-| zigbee2mqtt.initConfig.advanced.network_key                   | string | `"GENERATE"`                 |             |
-| zigbee2mqtt.initConfig.frontend                               | bool   | `true`                       |             |
-| zigbee2mqtt.initConfig.homeassistant                          | bool   | `true`                       |             |
-| zigbee2mqtt.initConfig.mqtt.base_topic                        | string | `"zigbee2mqtt"`              |             |
-| zigbee2mqtt.initConfig.mqtt.include_device_information        | bool   | `true`                       |             |
-| zigbee2mqtt.initConfig.mqtt.server                            | string | `"mqtt://mosquitto"`         |             |
-| zigbee2mqtt.initConfig.permit_join                            | bool   | `true`                       |             |
-| zigbee2mqtt.initConfig.serial.port                            | string | `"/dev/ttyUSB0"`             |             |
-| zigbee2mqtt.service.port                                      | int    | `8080`                       |             |
-| zigbee2mqtt.service.type                                      | string | `"ClusterIP"`                |             |
+| Key                                                    | Type   | Default                      | Description |
+| ------------------------------------------------------ | ------ | ---------------------------- | ----------- |
+| zigbee2mqtt.image                                      | string | `"koenkk/zigbee2mqtt:2.6.3"` |             |
+| zigbee2mqtt.ingress.annotations                        | object | `{}`                         |             |
+| zigbee2mqtt.ingress.className                          | string | `""`                         |             |
+| zigbee2mqtt.ingress.enabled                            | bool   | `false`                      |             |
+| zigbee2mqtt.ingress.hosts[0].host                      | string | `"zigbee2mqtt.local"`        |             |
+| zigbee2mqtt.ingress.hosts[0].paths[0].path             | string | `"/"`                        |             |
+| zigbee2mqtt.ingress.hosts[0].paths[0].pathType         | string | `"Prefix"`                   |             |
+| zigbee2mqtt.ingress.tls                                | list   | `[]`                         |             |
+| zigbee2mqtt.initConfig.advanced.last_seen              | string | `"ISO_8601"`                 |             |
+| zigbee2mqtt.initConfig.advanced.log_level              | string | `"info"`                     |             |
+| zigbee2mqtt.initConfig.advanced.log_output[0]          | string | `"console"`                  |             |
+| zigbee2mqtt.initConfig.frontend.enabled                | bool   | `true`                       |             |
+| zigbee2mqtt.initConfig.homeassistant.discovery_topic   | string | `"homeassistant"`            |             |
+| zigbee2mqtt.initConfig.homeassistant.enabled           | bool   | `true`                       |             |
+| zigbee2mqtt.initConfig.homeassistant.status_topic      | string | `"homeassistant/status"`     |             |
+| zigbee2mqtt.initConfig.mqtt.base_topic                 | string | `"zigbee2mqtt"`              |             |
+| zigbee2mqtt.initConfig.mqtt.include_device_information | bool   | `true`                       |             |
+| zigbee2mqtt.initConfig.mqtt.server                     | string | `"mqtt://mosquitto"`         |             |
+| zigbee2mqtt.initConfig.permit_join                     | bool   | `true`                       |             |
+| zigbee2mqtt.initConfig.serial.port                     | string | `"/dev/ttyUSB0"`             |             |
+| zigbee2mqtt.overwriteConfig                            | bool   | `false`                      |             |
+| zigbee2mqtt.service.port                               | int    | `8080`                       |             |
+| zigbee2mqtt.service.type                               | string | `"ClusterIP"`                |             |
+| zigbee2mqtt.timezone                                   | string | `"Europe/Berlin"`            |             |
 
 ---
 
