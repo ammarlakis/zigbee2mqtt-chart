@@ -45,7 +45,7 @@ git cliff --unreleased --tag "${tag}" --prepend CHANGELOG.md
 
 git add "${CHART_FILE}" CHANGELOG.md charts/zigbee2mqtt/README.md
 
- git commit -m "chore(release): prepare for ${new_version}" || {
+ git commit --no-verify -m "chore: prepare for ${new_version} @ignore" || {
   echo "Nothing to commit; aborting" >&2
   exit 1
 }
