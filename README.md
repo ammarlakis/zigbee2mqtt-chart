@@ -1,17 +1,25 @@
 # Zigbee2MQTT Helm Chart
 
-This repository contains a Helm chart for deploying Zigbee2MQTT.
+Helm chart for deploying [Zigbee2MQTT](https://github.com/Koenkk/zigbee2mqtt) on Kubernetes.
 
-## Usage (local)
+## Installation
 
-From the repository root:
+To install the chart:
 
-- `helm install my-zigbee charts/zigbee2mqtt`
-- `helm upgrade my-zigbee charts/zigbee2mqtt`
-- `helm uninstall my-zigbee`
+```bash
+helm repo add ammarlakis https://ammarlakis.github.io/helm-charts
+helm repo update
+helm install my-zigbee ammarlakis/zigbee2mqtt
+```
 
-By default the chart:
+## License
 
-- Runs Zigbee2MQTT as a StatefulSet with a persistent volume
-- Mounts the USB Zigbee adapter from the host (default `/dev/ttyUSB0`)
-- Exposes the Zigbee2MQTT web UI on port 8080 via a ClusterIP Service
+This project is licensed under the MIT License.
+
+## Support Me
+
+I create open-source code and write articles on [my website](https://ammarlakis.com) and [GitHub](https://github.com/ammarlakis), covering topics like automation, platform engineering, and smart home technology.
+
+If you'd like to support my work (or treat my cat to a tuna can!), you can do so here:
+
+[![Buy my cat a tuna can 😸](https://img.buymeacoffee.com/button-api/?text=Buy%20my%20cat%20a%20tuna%20can&emoji=%F0%9F%98%B8&slug=ammarlakis&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff)](https://www.buymeacoffee.com/ammarlakis)
