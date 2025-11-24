@@ -11,8 +11,6 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
-    outputs:
-      release_name: ${{ steps.version.outputs.tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -22,29 +20,16 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v4
 
-      - name: Determine version and changelog
-        id: version
+      - name: Set up git-cliff
+        uses: kenji-miyake/setup-git-cliff@v2
+
+      - name: Generate changelog
+        id: changelog
         run: |
           tag="${GITHUB_REF_NAME}"
-          version="${tag#v}"
-
-          if [ "$tag" = "$version" ]; then
-            version=$(grep '^version:' charts/zigbee2mqtt/Chart.yaml | awk '{print $2}')
-          fi
-
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-
-          if git describe --tags --abbrev=0 HEAD^ >/dev/null 2>&1; then
-            prev_tag=$(git describe --tags --abbrev=0 HEAD^)
-            range="$prev_tag..$tag"
-          else
-            first_commit=$(git rev-list --max-parents=0 HEAD)
-            range="$first_commit..$tag"
-          fi
 
           printf 'changelog<<EOF\n' >> "$GITHUB_OUTPUT"
-          git log --oneline "$range" >> "$GITHUB_OUTPUT"
+          git cliff --unreleased --tag "${tag}" >> "$GITHUB_OUTPUT"
           printf 'EOF\n' >> "$GITHUB_OUTPUT"
 
       - name: Package Helm chart
@@ -60,9 +45,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: ${{ steps.version.outputs.tag }}
-          body: ${{ steps.version.outputs.changelog }}
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: ${{ steps.changelog.outputs.changelog }}
           draft: false
           prerelease: false
           files: ${{ steps.package.outputs.file }}
@@ -90,6 +75,6 @@ jobs:
           inputs: |
             {
               "repository": "${{ github.repository }}",
-              "release_name": "${{ needs.release.outputs.release_name }}"
+              "release_name": "${{ github.ref_name }}"
             }
           token: ${{ steps.app-token.outputs.token }}
