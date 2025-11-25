@@ -26,10 +26,8 @@ jobs:
       - name: Generate changelog
         id: changelog
         run: |
-          tag="${GITHUB_REF_NAME}"
-
           printf 'changelog<<EOF\n' >> "$GITHUB_OUTPUT"
-          git cliff --unreleased --tag "${tag}" >> "$GITHUB_OUTPUT"
+          git cliff -l >> "$GITHUB_OUTPUT"
           printf 'EOF\n' >> "$GITHUB_OUTPUT"
 
       - name: Package Helm chart
