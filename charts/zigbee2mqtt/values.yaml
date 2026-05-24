@@ -66,3 +66,12 @@ zigbee2mqtt:
     #     - console
     #   log_level: info
     #   last_seen: "ISO_8601"
+
+  # -- Node selector for scheduling the Zigbee2MQTT pod.
+  nodeSelector: {}
+
+  # -- Affinity rules for scheduling the Zigbee2MQTT pod.
+  affinity: {}
+
+  # -- Tolerations for scheduling the Zigbee2MQTT pod.
+  tolerations: []

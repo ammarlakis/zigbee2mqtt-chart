@@ -17,7 +17,7 @@ spec:
     spec:
       initContainers:
         - name: init
-          image: busybox
+          image: "{{ .Values.zigbee2mqtt.image.repository }}:{{ default .Chart.AppVersion .Values.zigbee2mqtt.image.tag }}"
           command: ["sh"]
           args:
             - -c
@@ -28,6 +28,18 @@ spec:
             - name: config
               mountPath: /configuration.yaml
               subPath: configuration.yaml
+      {{- with .Values.zigbee2mqtt.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.zigbee2mqtt.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.zigbee2mqtt.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: app
           securityContext:
