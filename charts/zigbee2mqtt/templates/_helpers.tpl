@@ -27,3 +27,11 @@ app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/name: {{ include "zigbee2mqtt.name" . | quote }}
 app.kubernetes.io/instance: {{ .Release.Name | quote }}
 {{- end }}
+
+{{- define "zigbee2mqtt.serviceAccountName" -}}
+{{- if .Values.zigbee2mqtt.serviceAccount.create -}}
+{{- default (include "zigbee2mqtt.fullname" .) .Values.zigbee2mqtt.serviceAccount.name -}}
+{{- else -}}
+{{- default "default" .Values.zigbee2mqtt.serviceAccount.name -}}
+{{- end -}}
+{{- end }}

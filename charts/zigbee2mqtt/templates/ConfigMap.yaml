@@ -1,7 +1,11 @@
+{{- if not .Values.zigbee2mqtt.existingConfigSecret.name }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ printf "%s-config" (include "zigbee2mqtt.fullname" .) }}
+  labels:
+    {{- include "zigbee2mqtt.labels" . | nindent 4 }}
 data:
   configuration.yaml: |
     {{- toYaml .Values.zigbee2mqtt.initConfig | nindent 4 -}}
+{{- end }}

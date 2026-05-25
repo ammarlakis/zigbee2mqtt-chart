@@ -1,3 +1,4 @@
+{{- $deviceHostPath := default .Values.zigbee2mqtt.zigbee_device .Values.zigbee2mqtt.device.hostPath -}}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -9,15 +10,39 @@ spec:
     matchLabels:
       {{- include "zigbee2mqtt.selectorLabels" . | nindent 6 }}
   serviceName: {{ include "zigbee2mqtt.fullname" . }}
-  replicas: 1
+  replicas: {{ .Values.zigbee2mqtt.replicaCount }}
+  {{- with .Values.zigbee2mqtt.updateStrategy }}
+  updateStrategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   template:
     metadata:
       labels:
         {{- include "zigbee2mqtt.selectorLabels" . | nindent 8 }}
+        {{- with .Values.zigbee2mqtt.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.zigbee2mqtt.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
+      {{- if or .Values.zigbee2mqtt.serviceAccount.create .Values.zigbee2mqtt.serviceAccount.name }}
+      serviceAccountName: {{ include "zigbee2mqtt.serviceAccountName" . }}
+      {{- end }}
+      automountServiceAccountToken: {{ .Values.zigbee2mqtt.serviceAccount.automount }}
+      {{- with .Values.zigbee2mqtt.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.zigbee2mqtt.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       initContainers:
         - name: init
           image: "{{ .Values.zigbee2mqtt.image.repository }}:{{ default .Chart.AppVersion .Values.zigbee2mqtt.image.tag }}"
+          imagePullPolicy: {{ .Values.zigbee2mqtt.image.pullPolicy }}
           command: ["sh"]
           args:
             - -c
@@ -42,39 +67,114 @@ spec:
       {{- end }}
       containers:
         - name: app
+          {{- with .Values.zigbee2mqtt.securityContext }}
           securityContext:
-            privileged: true
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           image: "{{ .Values.zigbee2mqtt.image.repository }}:{{ default .Chart.AppVersion .Values.zigbee2mqtt.image.tag }}"
+          imagePullPolicy: {{ .Values.zigbee2mqtt.image.pullPolicy }}
           ports:
             - containerPort: 8080
               name: http
           volumeMounts:
             - name: data
               mountPath: /app/data
+            {{- if .Values.zigbee2mqtt.udev.enabled }}
             - name: udev
-              mountPath: /run/udev
-              readOnly: true
+              mountPath: {{ .Values.zigbee2mqtt.udev.mountPath }}
+              readOnly: {{ .Values.zigbee2mqtt.udev.readOnly }}
+            {{- end }}
             - name: zigbee-device
-              mountPath: /dev/ttyUSB0
+              mountPath: {{ .Values.zigbee2mqtt.device.mountPath }}
+            {{- with .Values.zigbee2mqtt.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           env:
             - name: TZ
               value: "{{ .Values.zigbee2mqtt.timezone }}"
+            {{- with .Values.zigbee2mqtt.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.zigbee2mqtt.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.zigbee2mqtt.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.zigbee2mqtt.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.zigbee2mqtt.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.zigbee2mqtt.startupProbe }}
+          startupProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
       volumes:
+        {{- if .Values.zigbee2mqtt.udev.enabled }}
         - name: udev
           hostPath:
-            path: /run/udev
-            type: Directory
+            path: {{ .Values.zigbee2mqtt.udev.hostPath | quote }}
+            {{- with .Values.zigbee2mqtt.udev.hostPathType }}
+            type: {{ . }}
+            {{- end }}
+        {{- end }}
         - name: zigbee-device
           hostPath:
-            path: "{{ .Values.zigbee2mqtt.zigbee_device }}"
+            path: {{ $deviceHostPath | quote }}
+            {{- with .Values.zigbee2mqtt.device.hostPathType }}
+            type: {{ . }}
+            {{- end }}
         - name: config
+          {{- if .Values.zigbee2mqtt.existingConfigSecret.name }}
+          secret:
+            secretName: {{ .Values.zigbee2mqtt.existingConfigSecret.name }}
+            items:
+              - key: {{ .Values.zigbee2mqtt.existingConfigSecret.key }}
+                path: configuration.yaml
+          {{- else }}
           configMap:
             name: {{ printf "%s-config" (include "zigbee2mqtt.fullname" .) }}
+          {{- end }}
+        {{- if not .Values.zigbee2mqtt.persistence.enabled }}
+        - name: data
+          emptyDir: {}
+        {{- else if .Values.zigbee2mqtt.persistence.existingClaim }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.zigbee2mqtt.persistence.existingClaim }}
+        {{- end }}
+        {{- with .Values.zigbee2mqtt.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+  {{- if and .Values.zigbee2mqtt.persistence.enabled (not .Values.zigbee2mqtt.persistence.existingClaim) }}
   volumeClaimTemplates:
     - metadata:
         name: data
+        {{- with .Values.zigbee2mqtt.persistence.labels }}
+        labels:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.zigbee2mqtt.persistence.annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
       spec:
-        accessModes: ["ReadWriteOnce"]
+        accessModes:
+          {{- toYaml .Values.zigbee2mqtt.persistence.accessModes | nindent 10 }}
+        {{- if .Values.zigbee2mqtt.persistence.storageClassName }}
+        {{- if eq .Values.zigbee2mqtt.persistence.storageClassName "-" }}
+        storageClassName: ""
+        {{- else }}
+        storageClassName: {{ .Values.zigbee2mqtt.persistence.storageClassName | quote }}
+        {{- end }}
+        {{- end }}
         resources:
           requests:
-            storage: 1Gi
+            storage: {{ .Values.zigbee2mqtt.persistence.size }}
+  {{- end }}

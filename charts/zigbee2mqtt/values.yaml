@@ -1,10 +1,68 @@
+# -- Override the chart name.
+nameOverride: ""
+# -- Override the fully qualified app name.
+fullnameOverride: ""
+
 zigbee2mqtt:
+  # -- Number of Zigbee2MQTT replicas. Keep this at 1 when using a single Zigbee adapter.
+  replicaCount: 1
+
   # -- Zigbee2MQTT image configuration.
   image:
     # -- Container image repository for Zigbee2MQTT.
     repository: koenkk/zigbee2mqtt
     # -- Container image tag. Defaults to .Chart.AppVersion when empty.
     tag: ""
+    # -- Container image pull policy.
+    pullPolicy: IfNotPresent
+
+  # -- Image pull secrets for private registries.
+  imagePullSecrets: []
+
+  # -- Service account configuration.
+  serviceAccount:
+    # -- Create a dedicated service account.
+    create: false
+    # -- Service account annotations.
+    annotations: {}
+    # -- Service account name. If empty and create is true, a name is generated.
+    name: ""
+    # -- Automount the service account token into the pod.
+    automount: true
+
+  # -- Additional labels for the Zigbee2MQTT pod.
+  podLabels: {}
+
+  # -- Additional annotations for the Zigbee2MQTT pod.
+  podAnnotations: {}
+
+  # -- Pod-level security context.
+  podSecurityContext: {}
+
+  # -- Container-level security context for Zigbee2MQTT.
+  securityContext:
+    privileged: true
+
+  # -- Resource requests and limits for Zigbee2MQTT.
+  resources: {}
+
+  # -- Additional environment variables for Zigbee2MQTT.
+  env: []
+
+  # -- Additional envFrom sources for Zigbee2MQTT.
+  envFrom: []
+
+  # -- Optional liveness probe for Zigbee2MQTT.
+  livenessProbe: {}
+
+  # -- Optional readiness probe for Zigbee2MQTT.
+  readinessProbe: {}
+
+  # -- Optional startup probe for Zigbee2MQTT.
+  startupProbe: {}
+
+  # -- StatefulSet update strategy.
+  updateStrategy: {}
 
   # -- Service configuration for the Zigbee2MQTT HTTP API / frontend.
   service:
@@ -12,6 +70,8 @@ zigbee2mqtt:
     type: ClusterIP
     # -- Service port for the HTTP API / frontend.
     port: 8080
+    # -- Additional Service annotations.
+    annotations: {}
 
   # -- Ingress configuration for exposing the HTTP API / frontend.
   ingress:
@@ -21,24 +81,71 @@ zigbee2mqtt:
     className: ""
     # -- Additional Ingress annotations.
     annotations: {}
-    # -- List of Ingress host definitions.
-    hosts:
-      #   host: zigbee2mqtt.local
-      #   paths:
-      #     - path: /
-      #       pathType: Prefix
+    # -- List of Ingress host definitions. Required when ingress is enabled.
+    hosts: []
+    #   - host: zigbee2mqtt.local
+    #     paths:
+    #       - path: /
+    #         pathType: Prefix
     # -- Ingress TLS configuration.
     tls: []
 
   # -- Timezone for the container (TZ environment variable).
   timezone: "Europe/Berlin"
 
-  # -- Path to the Zigbee adapter device on the node.
+  # -- Legacy path to the Zigbee adapter device on the node. Used when device.hostPath is empty.
   zigbee_device: /dev/ttyUSB0
 
+  # -- Zigbee adapter device mount configuration.
+  device:
+    # -- Path to the Zigbee adapter device on the node. Defaults to zigbee2mqtt.zigbee_device when empty.
+    hostPath: ""
+    # -- Path where the Zigbee adapter device is mounted in the container.
+    mountPath: /dev/ttyUSB0
+    # -- Optional hostPath type for the Zigbee adapter device.
+    hostPathType: ""
+
+  # -- udev host mount configuration.
+  udev:
+    # -- Mount host udev data into the container.
+    enabled: true
+    # -- Path to host udev data.
+    hostPath: /run/udev
+    # -- Path where udev data is mounted in the container.
+    mountPath: /run/udev
+    # -- hostPath type for udev data.
+    hostPathType: Directory
+    # -- Mount udev data read-only.
+    readOnly: true
+
+  # -- Persistence configuration for Zigbee2MQTT data.
+  persistence:
+    # -- Enable persistent storage. If false, an emptyDir volume is used.
+    enabled: true
+    # -- Existing PVC name to use instead of creating a volumeClaimTemplate.
+    existingClaim: ""
+    # -- Persistent volume access modes.
+    accessModes:
+      - ReadWriteOnce
+    # -- Persistent volume size.
+    size: 1Gi
+    # -- StorageClass name. Empty uses the cluster default. Set to "-" to disable dynamic provisioning.
+    storageClassName: ""
+    # -- Persistent volume claim annotations.
+    annotations: {}
+    # -- Persistent volume claim labels.
+    labels: {}
+
+  # -- Existing Secret containing configuration.yaml. When set, initConfig is not rendered as a ConfigMap.
+  existingConfigSecret:
+    # -- Existing Secret name.
+    name: ""
+    # -- Secret key containing configuration.yaml.
+    key: configuration.yaml
+
   # -- If true, always overwrite configuration.yaml in the data volume
-  #    from the ConfigMap on startup. When false, the file is only
-  #    created if it does not already exist.
+  #    from the ConfigMap or existing Secret on startup. When false, the file
+  #    is only created if it does not already exist.
   overwriteConfig: false
 
   # -- Initial Zigbee2MQTT configuration written to configuration.yaml.
@@ -66,6 +173,12 @@ zigbee2mqtt:
     #     - console
     #   log_level: info
     #   last_seen: "ISO_8601"
+
+  # -- Additional volume mounts for the Zigbee2MQTT container.
+  extraVolumeMounts: []
+
+  # -- Additional volumes for the Zigbee2MQTT pod.
+  extraVolumes: []
 
   # -- Node selector for scheduling the Zigbee2MQTT pod.
   nodeSelector: {}
