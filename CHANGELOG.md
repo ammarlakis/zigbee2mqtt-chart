@@ -1,3 +1,13 @@
+## [0.5.0] - 2026-05-25
+
+### 🚀 Features
+
+- Harden zigbee2mqtt chart
+
+### ⚙️ Miscellaneous Tasks
+
+- Create renovate config
+- Schedule renovate updates
 ## [0.4.0] - 2026-05-24
 
 ### 🚀 Features
