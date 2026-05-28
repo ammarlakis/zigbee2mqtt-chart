@@ -11,8 +11,10 @@ zigbee2mqtt:
   image:
     # -- Container image repository for Zigbee2MQTT.
     repository: koenkk/zigbee2mqtt
-    # -- Container image tag. Defaults to .Chart.AppVersion when empty.
-    tag: ""
+    # -- Container image tag.
+    tag: "2.6.3"
+    # -- Container image digest. When set, the rendered image uses repository@digest.
+    digest: ""
     # -- Container image pull policy.
     pullPolicy: IfNotPresent
 

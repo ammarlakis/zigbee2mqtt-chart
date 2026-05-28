@@ -35,3 +35,14 @@ app.kubernetes.io/instance: {{ .Release.Name | quote }}
 {{- default "default" .Values.zigbee2mqtt.serviceAccount.name -}}
 {{- end -}}
 {{- end }}
+
+{{- define "zigbee2mqtt.image" -}}
+{{- $tag := default .Chart.AppVersion .Values.zigbee2mqtt.image.tag -}}
+{{- if .Values.zigbee2mqtt.image.digest -}}
+{{- printf "%s@%s" .Values.zigbee2mqtt.image.repository .Values.zigbee2mqtt.image.digest -}}
+{{- else if hasPrefix "@" $tag -}}
+{{- printf "%s%s" .Values.zigbee2mqtt.image.repository $tag -}}
+{{- else -}}
+{{- printf "%s:%s" .Values.zigbee2mqtt.image.repository $tag -}}
+{{- end -}}
+{{- end }}
