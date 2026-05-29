@@ -13,8 +13,6 @@ zigbee2mqtt:
     repository: koenkk/zigbee2mqtt
     # -- Container image tag.
     tag: "2.6.3"
-    # -- Container image digest. When set, the rendered image uses repository@digest.
-    digest: ""
     # -- Container image pull policy.
     pullPolicy: IfNotPresent
 
