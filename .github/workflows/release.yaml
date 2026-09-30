@@ -1,78 +1,74 @@
 name: Release Charts
-
 on:
   push:
-    tags:
-      - "v*"
-  workflow_dispatch:
-
+    tags: ['v*.*.*']
+permissions:
+  contents: read
 jobs:
+  verify:
+    uses: ./.github/workflows/ci.yaml
   release:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
-    runs-on: ubuntu-latest
     outputs:
-      chart_asset: ${{ steps.package.outputs.asset }}
+      chart_asset: ${{ steps.meta.outputs.asset }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
-
-      - name: Install Helm
-        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
-
-      - name: Set up git-cliff
-        uses: kenji-miyake/setup-git-cliff@2778609c643a39a2576c4bae2e493b855eb4aee8 # v2.0.1
-
-      - name: Generate changelog
-        id: changelog
-        run: |
-          printf 'changelog<<EOF\n' >> "$GITHUB_OUTPUT"
-          git cliff -l >> "$GITHUB_OUTPUT"
-          printf 'EOF\n' >> "$GITHUB_OUTPUT"
-
-      - name: Package Helm chart
-        id: package
-        run: |
-          mkdir -p dist
-          helm package charts/zigbee2mqtt --destination dist
-          file=$(ls dist/zigbee2mqtt-*.tgz)
-          echo "file=$file" >> "$GITHUB_OUTPUT"
-          echo "asset=${file##*/}" >> "$GITHUB_OUTPUT"
-
-      - name: Create GitHub Release and upload asset
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310
         with:
-          tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
-          body: ${{ steps.changelog.outputs.changelog }}
-          draft: false
-          prerelease: false
-          files: ${{ steps.package.outputs.file }}
-          make_latest: true
-
+          version: v3.19.0
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: tested-chart
+          path: dist
+      - name: Check immutable release metadata
+        id: meta
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]
+          version="$(awk '/^version:/ {print $2; exit}' charts/zigbee2mqtt/Chart.yaml)"
+          test "$TAG" = "v$version"
+          git merge-base --is-ancestor HEAD origin/master
+          asset="zigbee2mqtt-$version.tgz"
+          test -f "dist/$asset"
+          test "$(helm show chart "dist/$asset" | awk '/^version:/ {print $2; exit}')" = "$version"
+          echo "asset=$asset" >> "$GITHUB_OUTPUT"
+      - uses: kenji-miyake/setup-git-cliff@2778609c643a39a2576c4bae2e493b855eb4aee8
+      - name: Publish tested package
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          ASSET: ${{ steps.meta.outputs.asset }}
+        run: |
+          git cliff --latest > release-notes.md
+          gh release create "$TAG" "dist/$ASSET" --verify-tag --notes-file release-notes.md
+          gh release download "$TAG" --pattern "$ASSET" --dir downloaded
+          cmp "dist/$ASSET" "downloaded/$ASSET"
   update-registry:
     needs: release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Create GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
         with:
           client-id: 2336325
           private-key: ${{ secrets.UPDATE_REGISTRY_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-
       - name: Trigger registry update
-        uses: the-actions-org/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7 # v4
+        uses: the-actions-org/workflow-dispatch@3133c5d135c7dbe4be4f9793872b6ef331b53bc7
         with:
-          repo: "ammarlakis/helm-charts"
+          repo: ammarlakis/helm-charts
           workflow: Add Chart to Helm Repository
-          ref: "master"
-          wait-for-completion: false
+          ref: master
+          wait-for-completion: true
           inputs: |
             {
               "repository": "${{ github.repository }}",

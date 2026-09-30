@@ -1,0 +1,20 @@
+fullnameOverride: maintenance-smoke
+zigbee2mqtt:
+  persistence:
+    enabled: false
+  device:
+    hostPath: /dev/null
+    hostPathType: CharDevice
+  udev:
+    enabled: false
+  securityContext:
+    privileged: false
+  env:
+    - name: Z2M_ONBOARD_FORCE_RUN
+      value: '1'
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+    periodSeconds: 5
+  initConfig: {}
