@@ -12,6 +12,10 @@ helm repo update
 helm install my-zigbee ammarlakis/zigbee2mqtt
 ```
 
+## Maintenance and releases
+
+See [Maintenance](MAINTENANCE.md) for consumer verification and release approval. `just release` prepares a local release branch; `scripts/release.sh --pr` also opens a draft PR. Neither creates a version tag or publishes a release.
+
 ## License
 
 This project is licensed under the MIT License.
