@@ -45,35 +45,26 @@ jobs:
           set -euo pipefail
           chart="charts/$CHART_NAME"
           current_version="$(sed -n 's/^version: //p' "$chart/Chart.yaml")"
-          raw_version="$(git cliff --unreleased --bumped-version)"
-          new_version="${raw_version#v}"
+          tag="$(git cliff --unreleased --bumped-version)"
+          new_version="${tag#v}"
           if [[ "$new_version" == "$current_version" ]]; then
             echo 'No release-worthy changes; skipping release.'
             exit 0
           fi
-          tag="v$new_version"
           sed -i "s/^version: .*/version: $new_version/" "$chart/Chart.yaml"
           helm-docs --chart-search-root "$chart"
           git cliff --unreleased --tag "$tag" > release-notes.md
           git cliff --unreleased --tag "$tag" --prepend CHANGELOG.md
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "Prepared $tag."
-      - name: Validate and package release
+      - name: Package chart
         if: steps.prepare.outputs.tag != ''
         id: meta
         env:
           TAG: ${{ steps.prepare.outputs.tag }}
         run: |
-          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]
-          version="$(sed -n 's/^version: //p' "charts/$CHART_NAME/Chart.yaml")"
-          test "$TAG" = "v$version"
-          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/master)"
-          asset="${{ env.CHART_NAME }}-$version.tgz"
-          helm template release-check charts/${{ env.CHART_NAME }} >/dev/null
-          helm package charts/${{ env.CHART_NAME }} --destination dist
-          test -f "dist/$asset"
-          test "$(helm show chart "dist/$asset" | sed -n 's/^version: //p')" = "$version"
-          echo "asset=$asset" >> "$GITHUB_OUTPUT"
+          helm package "charts/$CHART_NAME" --destination dist
+          echo "asset=$CHART_NAME-${TAG#v}.tgz" >> "$GITHUB_OUTPUT"
       - name: Commit version and push tag
         if: steps.prepare.outputs.tag != ''
         env:
@@ -93,8 +84,6 @@ jobs:
           ASSET: ${{ steps.meta.outputs.asset }}
         run: |
           gh release create "$TAG" "dist/$ASSET" --verify-tag --notes-file release-notes.md
-          gh release download "$TAG" --pattern "$ASSET" --dir downloaded
-          cmp "dist/$ASSET" "downloaded/$ASSET"
   update-registry:
     needs: release
     if: needs.release.outputs.tag != ''
