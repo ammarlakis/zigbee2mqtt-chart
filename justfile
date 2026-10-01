@@ -1,9 +1,6 @@
 precommit:
     pre-commit install
 
-release:
-    ./scripts/release.sh
-
 docs:
     helm-docs
 
