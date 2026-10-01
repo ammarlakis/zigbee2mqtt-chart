@@ -3,7 +3,6 @@
 
 
 [changelog]
-trim = true
 header = "# Changelog"
 body = """
 {% if version %}\
@@ -26,14 +25,11 @@ body = """
 
 [git]
 include_paths = ["charts/zigbee2mqtt/**"]
-exclude_paths = ["**/*.md"]
+exclude_paths = [
+  "**/*.md",
+  "charts/zigbee2mqtt/ci/**",
+]
 tag_pattern = "^v[0-9]+\\.[0-9]+\\.[0-9]+$"
-conventional_commits = true
-filter_unconventional = true
-require_conventional = false
-split_commits = false
-commit_preprocessors = []
-protect_breaking_commits = false
 commit_parsers = [
   { field = "breaking", pattern = "true", group = "Breaking Changes" },
   # Use the dependency name as the key for displaying only its latest update.
@@ -43,11 +39,5 @@ commit_parsers = [
   { message = "^feat", group = "Features" },
   { message = "^fix", group = "Bug Fixes" },
   { message = "^perf", group = "Performance" },
-  { message = ".*", skip = true },
 ]
 filter_commits = true
-use_branch_tags = false
-topo_order = false
-topo_order_commits = true
-sort_commits = "oldest"
-recurse_submodules = false
