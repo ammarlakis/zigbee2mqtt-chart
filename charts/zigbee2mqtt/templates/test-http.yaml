@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ printf "%s-test-http" (include "zigbee2mqtt.fullname" . | trunc 53 | trimSuffix "-") }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  restartPolicy: Never
+  activeDeadlineSeconds: 60
+  automountServiceAccountToken: false
+  containers:
+    - name: http
+      image: busybox:1.37.0
+      command: ["sh", "-ec"]
+      args:
+        - |
+          wget -T 10 -O /tmp/index.html "$URL"
+          grep -qi 'zigbee2mqtt' /tmp/index.html
+      env:
+        - name: URL
+          value: {{ printf "http://%s:%v/" (include "zigbee2mqtt.fullname" .) .Values.zigbee2mqtt.service.port | quote }}

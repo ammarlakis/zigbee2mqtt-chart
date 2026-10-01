@@ -1,4 +1,3 @@
-fullnameOverride: maintenance-smoke
 zigbee2mqtt:
   persistence:
     enabled: false
@@ -11,7 +10,7 @@ zigbee2mqtt:
     privileged: false
   env:
     - name: Z2M_ONBOARD_FORCE_RUN
-      value: '1'
+      value: "1"
   readinessProbe:
     httpGet:
       path: /

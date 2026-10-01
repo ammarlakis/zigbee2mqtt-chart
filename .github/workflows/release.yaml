@@ -1,9 +1,19 @@
 name: Release Charts
+
 on:
   push:
-    tags: ['v*.*.*']
+    branches: [master]
+
+concurrency:
+  group: chart-release
+  cancel-in-progress: false
+
 permissions:
   contents: read
+
+env:
+  CHART_NAME: zigbee2mqtt
+
 jobs:
   verify:
     uses: ./.github/workflows/ci.yaml
@@ -15,6 +25,7 @@ jobs:
       contents: write
     outputs:
       chart_asset: ${{ steps.meta.outputs.asset }}
+      tag: ${{ steps.prepare.outputs.tag }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -22,36 +33,71 @@ jobs:
       - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310
         with:
           version: v3.19.0
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
-        with:
-          name: tested-chart
-          path: dist
-      - name: Check immutable release metadata
+      - uses: kenji-miyake/setup-git-cliff@2778609c643a39a2576c4bae2e493b855eb4aee8
+      - name: Install helm-docs
+        run: |
+          curl -fsSL https://github.com/norwoodj/helm-docs/releases/download/v1.14.2/helm-docs_1.14.2_Linux_x86_64.tar.gz |
+            tar -xz -C "$RUNNER_TEMP" helm-docs
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - name: Prepare release version, documentation, and changelog
+        id: prepare
+        run: |
+          set -euo pipefail
+          chart="charts/$CHART_NAME"
+          current_version="$(sed -n 's/^version: //p' "$chart/Chart.yaml")"
+          raw_version="$(git cliff --unreleased --bumped-version)"
+          new_version="${raw_version#v}"
+          if [[ "$new_version" == "$current_version" ]]; then
+            echo 'No release-worthy changes; skipping release.'
+            exit 0
+          fi
+          tag="v$new_version"
+          sed -i "s/^version: .*/version: $new_version/" "$chart/Chart.yaml"
+          helm-docs --chart-search-root "$chart"
+          git cliff --unreleased --tag "$tag" > release-notes.md
+          git cliff --unreleased --tag "$tag" --prepend CHANGELOG.md
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Prepared $tag."
+      - name: Validate and package release
+        if: steps.prepare.outputs.tag != ''
         id: meta
         env:
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ steps.prepare.outputs.tag }}
         run: |
           [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]
-          version="$(awk '/^version:/ {print $2; exit}' charts/zigbee2mqtt/Chart.yaml)"
+          version="$(sed -n 's/^version: //p' "charts/$CHART_NAME/Chart.yaml")"
           test "$TAG" = "v$version"
-          git merge-base --is-ancestor HEAD origin/master
-          asset="zigbee2mqtt-$version.tgz"
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/master)"
+          asset="${{ env.CHART_NAME }}-$version.tgz"
+          helm template release-check charts/${{ env.CHART_NAME }} >/dev/null
+          helm package charts/${{ env.CHART_NAME }} --destination dist
           test -f "dist/$asset"
-          test "$(helm show chart "dist/$asset" | awk '/^version:/ {print $2; exit}')" = "$version"
+          test "$(helm show chart "dist/$asset" | sed -n 's/^version: //p')" = "$version"
           echo "asset=$asset" >> "$GITHUB_OUTPUT"
-      - uses: kenji-miyake/setup-git-cliff@2778609c643a39a2576c4bae2e493b855eb4aee8
-      - name: Publish tested package
+      - name: Commit version and push tag
+        if: steps.prepare.outputs.tag != ''
+        env:
+          TAG: ${{ steps.prepare.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add charts/${{ env.CHART_NAME }}/Chart.yaml charts/${{ env.CHART_NAME }}/README.md CHANGELOG.md
+          git commit -m "chore(release): prepare for $TAG"
+          git tag "$TAG"
+          git push --atomic origin HEAD:master "refs/tags/$TAG"
+      - name: Publish release package
+        if: steps.prepare.outputs.tag != ''
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ steps.prepare.outputs.tag }}
           ASSET: ${{ steps.meta.outputs.asset }}
         run: |
-          git cliff --latest > release-notes.md
           gh release create "$TAG" "dist/$ASSET" --verify-tag --notes-file release-notes.md
           gh release download "$TAG" --pattern "$ASSET" --dir downloaded
           cmp "dist/$ASSET" "downloaded/$ASSET"
   update-registry:
     needs: release
+    if: needs.release.outputs.tag != ''
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -72,7 +118,7 @@ jobs:
           inputs: |
             {
               "repository": "${{ github.repository }}",
-              "release_name": "${{ github.ref_name }}",
+              "release_name": "${{ needs.release.outputs.tag }}",
               "chart_asset": "${{ needs.release.outputs.chart_asset }}"
             }
           token: ${{ steps.app-token.outputs.token }}

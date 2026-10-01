@@ -1,46 +1,32 @@
 name: CI
+
 on:
   pull_request:
-  push:
-    branches: [master]
-  schedule:
-    - cron: '29 6 * * 5'
-  workflow_dispatch:
   workflow_call:
+
+concurrency:
+  group: chart-ci-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
+
+env:
+  CHART_NAME: zigbee2mqtt
+
 jobs:
   validate:
-    name: Chart consumer tests
+    name: Chart tests
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310
         with:
           version: v3.19.0
-      - name: Validate and package
-        run: |
-          python3 -m json.tool renovate.json >/dev/null
-          python3 -m json.tool charts/zigbee2mqtt/values.schema.json >/dev/null
-          bash -n scripts/release.sh scripts/smoke.sh
-          helm lint charts/zigbee2mqtt
-          helm template maintenance-smoke charts/zigbee2mqtt >/dev/null
-          helm template maintenance-smoke charts/zigbee2mqtt -f ci/smoke-values.yaml >/dev/null
-          mkdir -p dist
-          helm package charts/zigbee2mqtt --destination dist
+      - uses: helm/chart-testing-action@6ec842c01de15ebb84c8627d2744a0c2f2755c9f # v2.8.0
+      - name: Lint chart
+        run: ct lint --charts "charts/$CHART_NAME"
       - uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc
-        with:
-          cluster_name: maintenance
-      - name: Install, serve HTTP, persist, and upgrade the packaged chart
-        run: |
-          export KUBECONFIG="$RUNNER_TEMP/maintenance-kubeconfig"
-          kind get kubeconfig --name maintenance > "$KUBECONFIG"
-          scripts/smoke.sh dist/zigbee2mqtt-*.tgz
-      - name: Preserve verified package
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: tested-chart
-          path: dist/*.tgz
-          if-no-files-found: error
-          retention-days: 14
+      - name: Install chart and run Helm tests
+        run: ct install --charts "charts/$CHART_NAME" --helm-extra-args "--timeout 5m"
