@@ -32,7 +32,7 @@ jobs:
           fetch-depth: 0
       - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310
         with:
-          version: v3.19.0
+          version: v4.3.0
       - uses: kenji-miyake/setup-git-cliff@2778609c643a39a2576c4bae2e493b855eb4aee8
       - name: Install helm-docs
         run: |
