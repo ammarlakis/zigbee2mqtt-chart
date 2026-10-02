@@ -4,7 +4,7 @@ version: 0.5.2
 description: Zigbee2MQTT Helm chart
 type: application
 # renovate: image=koenkk/zigbee2mqtt
-appVersion: 2.14.1
+appVersion: 2.14.2
 home: https://github.com/ammarlakis/zigbee2mqtt-chart
 maintainers:
   - name: ammarlakis
