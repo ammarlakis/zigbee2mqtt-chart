@@ -1,6 +1,6 @@
 # zigbee2mqtt
 
-![Version: 0.5.2](https://img.shields.io/badge/Version-0.5.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.14.1](https://img.shields.io/badge/AppVersion-2.14.1-informational?style=flat-square)
+![Version: 0.5.3](https://img.shields.io/badge/Version-0.5.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.14.2](https://img.shields.io/badge/AppVersion-2.14.2-informational?style=flat-square)
 
 Zigbee2MQTT Helm chart
 
@@ -34,10 +34,10 @@ Zigbee2MQTT Helm chart
 | zigbee2mqtt.existingConfigSecret.name | string | `""` | Existing Secret name. |
 | zigbee2mqtt.extraVolumeMounts | list | `[]` | Additional volume mounts for the Zigbee2MQTT container. |
 | zigbee2mqtt.extraVolumes | list | `[]` | Additional volumes for the Zigbee2MQTT pod. |
-| zigbee2mqtt.image | object | `{"pullPolicy":"IfNotPresent","repository":"koenkk/zigbee2mqtt","tag":"2.14.1@sha256:fef0de769dcd04c27b3a6d277b61046eb96284bdd4198dcb1687c3a01b3020f3"}` | Zigbee2MQTT image configuration. |
+| zigbee2mqtt.image | object | `{"pullPolicy":"IfNotPresent","repository":"koenkk/zigbee2mqtt","tag":"2.14.2@sha256:addbfb08fcef2e4477de1535636118241e10d13e898fbe4d9faba8a4d7396311"}` | Zigbee2MQTT image configuration. |
 | zigbee2mqtt.image.pullPolicy | string | `"IfNotPresent"` | Container image pull policy. |
 | zigbee2mqtt.image.repository | string | `"koenkk/zigbee2mqtt"` | Container image repository for Zigbee2MQTT. |
-| zigbee2mqtt.image.tag | string | `"2.14.1@sha256:fef0de769dcd04c27b3a6d277b61046eb96284bdd4198dcb1687c3a01b3020f3"` | Container image tag. |
+| zigbee2mqtt.image.tag | string | `"2.14.2@sha256:addbfb08fcef2e4477de1535636118241e10d13e898fbe4d9faba8a4d7396311"` | Container image tag. |
 | zigbee2mqtt.imagePullSecrets | list | `[]` | Image pull secrets for private registries. |
 | zigbee2mqtt.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[],"tls":[]}` | Ingress configuration for exposing the HTTP API / frontend. |
 | zigbee2mqtt.ingress.annotations | object | `{}` | Additional Ingress annotations. |

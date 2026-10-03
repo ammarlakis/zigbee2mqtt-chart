@@ -1,4 +1,10 @@
 # Changelog
+## [0.5.3] - 2026-10-03
+
+### Dependencies
+
+- Update koenkk/zigbee2mqtt docker tag to v2.14.2 (#28)
+
 ## [0.5.2] - 2026-10-01
 
 ### Dependencies

@@ -1,6 +1,6 @@
 apiVersion: v2
 name: zigbee2mqtt
-version: 0.5.2
+version: 0.5.3
 description: Zigbee2MQTT Helm chart
 type: application
 # renovate: image=koenkk/zigbee2mqtt
